@@ -27,8 +27,10 @@ export const ajax_post = (endpoint, body=null) => {
                 remove_session()
             }else{
                 set_session(err.response.data.session)
-                store.dispatch(setSession())
+
             }
+
+            store.dispatch(setSession())
 
             return reject(err.response.data)
         })
@@ -47,6 +49,7 @@ export const ajax_get = (endpoint) => {
             }
         }).then(response => {
             set_session(response.data.session)
+            store.dispatch(setSession())
             return resolve(response.data)
 
         }).catch(err => {
@@ -55,6 +58,8 @@ export const ajax_get = (endpoint) => {
             }else{
                 set_session(err.response.data.session)
             }
+            store.dispatch(setSession())
+
             return reject(err.response.data)
         })
     })

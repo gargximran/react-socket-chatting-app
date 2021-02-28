@@ -1,17 +1,90 @@
 import React, {Component} from 'react';
-import {Row, Col, Input, Button, Card} from 'antd'
+import {Row, Col, Input, Button, Card, Typography, message} from 'antd'
 import { ajax_post } from "../../helpers/ajax_request";
+import { connect } from 'react-redux'
 
 import './HomePage.css'
 
+const { Text } = Typography
+
 class HomePage extends Component {
 
-    componentDidMount() {
-        const form = new FormData()
-        // form.append('name', 'helo')
-        form.append('room_name', 'helo')
-        ajax_post('/api/create_room', form).then(res => console.log(res)).catch(err => console.log(err))
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            create_room_form: {
+                value: {
+                    name: '',
+                    room_name: ''
+                },
+                errors: {
+                    name: '',
+                    room_name: ''
+                },
+                loading: false
+            }
+        }
     }
+
+    form_handler = (event) => (
+        this.setState({
+            create_room_form: {
+                ...this.state.create_room_form, value: {
+                    ...this.state.create_room_form.value, [event.target.name]: event.target.value
+                },
+                errors: {
+                    name: '',
+                    room_name: ''
+                }
+            }
+        })
+    )
+
+    submit_form = () => {
+        const form = new FormData()
+        form.append('name', this.state.create_room_form.value.name || '')
+        form.append('room_name', this.state.create_room_form.value.room_name || '')
+
+        this.setState({
+            create_room_form: {
+                value: {...this.state.create_room_form.value},
+                errors: {
+                    name: '',
+                    room_name: ''
+                },
+                loading: true
+            }
+        })
+
+        ajax_post('/api/create_room', form)
+            .then(res => {
+                this.setState({
+                    create_room_form: {
+                        value: {
+                            name: '',
+                            room_name: ''
+                        },
+                        errors: {
+                            name: '',
+                            room_name: ''
+                        },
+                        loading: false
+                    }
+                })
+            })
+            .catch(err => {
+                message.error(err.message)
+                this.setState({
+                    create_room_form: {
+                        value: {...this.state.create_room_form.value},
+                        errors: {...err.errors},
+                        loading: false
+                    }
+                })
+            })
+    }
+
 
 
     render() {
@@ -22,14 +95,18 @@ class HomePage extends Component {
                 </Col>
                 <Col xs={{span: 22}} sm={{span: 22}} md={{span: 7}}>
 
-                    <Card title={'Create a room!'} hoverable className={'card-design'}>
-                        <Input size={'large'} type={'text'} placeholder={'Room Name'} bordered={true}></Input>
+                    <Card title={'Create a room!'} className={'card-design'}>
+                        <Input size={'large'} name={'room_name'} value={this.state.create_room_form.value.room_name} onChange={(e) => this.form_handler(e)} type={'text'} placeholder={'Room Name'} bordered={true}></Input>
+                        <br />
+                        <Text type="danger">{this.state.create_room_form.errors.room_name}</Text>
                         <br/>
                         <br/>
-                        <Input size={'large'} type={'text'} placeholder={'Your name'}></Input>
+                        <Input value={this.state.create_room_form.value.name} name={'name'} size={'large'} onChange={(e) => this.form_handler(e)} type={'text'} placeholder={'Your name'}></Input>
+                        <br/>
+                        <Text type="danger">{this.state.create_room_form.errors.name}</Text>
                         <br/>
                         <br/>
-                        <Button type={'primary'}>Create Room</Button>
+                        <Button loading={this.state.create_room_form.loading} onClick={() => this.submit_form()} type={'primary'}>Create Room</Button>
                     </Card>
 
                 </Col>
