@@ -1,25 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import React, {Component} from 'react';
+import HeaderComponent from './components/Header/HeaderComponent'
+// import FooterComponent from "./components/Footer/FooterComponent";
+import HomePage from "./pages/Home/HomePage";
+import { Layout } from 'antd'
+import { Switch, Route } from 'react-router-dom'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import 'antd/dist/antd.css'
+
+const { Content } = Layout
+
+class App extends Component {
+    render() {
+        return (
+            <Layout style={{height: '100vh'}}>
+                <HeaderComponent></HeaderComponent>
+                <Content>
+                    <Switch>
+                        <Route path={'/:meeting_id'}>
+                                hello
+                        </Route>
+                        <Route path={'/'}>
+                            <HomePage></HomePage>
+                        </Route>
+                    </Switch>
+                </Content>
+
+            </Layout>
+        );
+    }
 }
 
 export default App;
