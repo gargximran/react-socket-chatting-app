@@ -1,3 +1,8 @@
 .secondary-bg{
   background-color: #d4cfc4 !important;
 }
+
+.error-feedback{
+  font-size: 12px;
+  padding: 2px 0px 0 5px;
+}

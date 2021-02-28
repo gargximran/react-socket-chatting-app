@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {Row, Col, Input, Button, Card, Typography, message} from 'antd'
 import { ajax_post } from "../../helpers/ajax_request";
 import { connect } from 'react-redux'
+import { Redirect } from 'react-router-dom'
+
 
 import './HomePage.css'
 
@@ -23,9 +25,11 @@ class HomePage extends Component {
                     room_name: ''
                 },
                 loading: false
-            }
+            },
+            redirect: ''
         }
     }
+
 
     form_handler = (event) => (
         this.setState({
@@ -60,18 +64,9 @@ class HomePage extends Component {
         ajax_post('/api/create_room', form)
             .then(res => {
                 this.setState({
-                    create_room_form: {
-                        value: {
-                            name: '',
-                            room_name: ''
-                        },
-                        errors: {
-                            name: '',
-                            room_name: ''
-                        },
-                        loading: false
-                    }
+                    redirect: `/${res.data.id}`
                 })
+
             })
             .catch(err => {
                 message.error(err.message)
@@ -90,6 +85,10 @@ class HomePage extends Component {
     render() {
         return (
             <Row justify="space-around" align="middle">
+                {
+                    this.state.redirect && <Redirect to={this.state.redirect} />
+                }
+
                 <Col xs={{span: 1}} sm={{span: 1}} md={{span: 4}}>
                     <div className={'full-height'}></div>
                 </Col>
@@ -98,12 +97,12 @@ class HomePage extends Component {
                     <Card title={'Create a room!'} className={'card-design'}>
                         <Input size={'large'} name={'room_name'} value={this.state.create_room_form.value.room_name} onChange={(e) => this.form_handler(e)} type={'text'} placeholder={'Room Name'} bordered={true}></Input>
                         <br />
-                        <Text type="danger">{this.state.create_room_form.errors.room_name}</Text>
+                        <Text className={'error-feedback'} type="danger">{this.state.create_room_form.errors.room_name}</Text>
                         <br/>
                         <br/>
                         <Input value={this.state.create_room_form.value.name} name={'name'} size={'large'} onChange={(e) => this.form_handler(e)} type={'text'} placeholder={'Your name'}></Input>
                         <br/>
-                        <Text type="danger">{this.state.create_room_form.errors.name}</Text>
+                        <Text className={'error-feedback'} type="danger">{this.state.create_room_form.errors.name}</Text>
                         <br/>
                         <br/>
                         <Button loading={this.state.create_room_form.loading} onClick={() => this.submit_form()} type={'primary'}>Create Room</Button>
