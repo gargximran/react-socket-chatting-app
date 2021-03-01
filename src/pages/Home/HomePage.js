@@ -1,124 +1,98 @@
-import React, {Component} from 'react';
+import React, { useState } from 'react';
 import {Row, Col, Input, Button, Card, Typography, message} from 'antd'
 import { ajax_post } from "../../helpers/ajax_request";
-import { connect } from 'react-redux'
-import { Redirect } from 'react-router-dom'
-
-
+import { useHistory } from 'react-router-dom'
+import errorTune from '../../assets/tune/error_bleep.mp3'
+import successTune from '../../assets/tune/success_beep.mp3'
 import './HomePage.css'
 
 const { Text } = Typography
 
-class HomePage extends Component {
 
-    constructor(props) {
-        super(props);
+const HomePage = () => {
 
-        this.state = {
-            create_room_form: {
-                value: {
-                    name: '',
-                    room_name: ''
-                },
-                errors: {
-                    name: '',
-                    room_name: ''
-                },
-                loading: false
-            },
-            redirect: ''
-        }
+    const history = useHistory()
+
+    const [formValue, setFromValue] = useState({
+        name: '',
+        room_name: '',
+        loading: false
+    })
+
+    const [formErrors, setFormErrors] = useState({
+        name: '',
+        room_name: ''
+    })
+
+    const formHandler = e => {
+        setFromValue({
+            ...formValue, [e.target.name]: e.target.value
+        })
     }
 
+    const submitForm = () => {
 
-    form_handler = (event) => (
-        this.setState({
-            create_room_form: {
-                ...this.state.create_room_form, value: {
-                    ...this.state.create_room_form.value, [event.target.name]: event.target.value
-                },
-                errors: {
-                    name: '',
-                    room_name: ''
-                }
-            }
+        setFromValue({
+            ...formValue, loading: true
         })
-    )
 
-    submit_form = () => {
         const form = new FormData()
-        form.append('name', this.state.create_room_form.value.name || '')
-        form.append('room_name', this.state.create_room_form.value.room_name || '')
-
-        this.setState({
-            create_room_form: {
-                value: {...this.state.create_room_form.value},
-                errors: {
-                    name: '',
-                    room_name: ''
-                },
-                loading: true
-            }
-        })
+        form.append('name', formValue.name)
+        form.append('room_name', formValue.room_name)
 
         ajax_post('/api/create_room', form)
             .then(res => {
-                this.setState({
-                    redirect: `/${res.data.id}`
-                })
+                new Audio(successTune).play()
+                message.success(res.message)
+                //redirect to room after successfull request
+                history.push('/'+ res.data.id)
 
             })
             .catch(err => {
+                new Audio(errorTune).play()
+
+
                 message.error(err.message)
-                this.setState({
-                    create_room_form: {
-                        value: {...this.state.create_room_form.value},
-                        errors: {...err.errors},
-                        loading: false
-                    }
-                })
+                setFormErrors(err.errors)
+                setFromValue({...formValue, loading: false})
             })
     }
 
 
+    return (
+        <Row justify="space-around" align="middle">
+            <Col xs={{span: 1}} sm={{span: 1}} md={{span: 4}}>
+                <div className={'full-height'}></div>
+            </Col>
+            <Col xs={{span: 22}} sm={{span: 22}} md={{span: 7}}>
 
-    render() {
-        return (
-            <Row justify="space-around" align="middle">
-                {
-                    this.state.redirect && <Redirect to={this.state.redirect} />
-                }
+                <Card title={'Create a room!'} className={'card-design'}>
+                    <Input size={'large'} name={'room_name'} value={formValue.room_name} onChange={(e) => formHandler(e)} type={'text'} placeholder={'Room Name'} bordered={true}></Input>
+                    <br />
+                    {
+                        formErrors.room_name && <Text className={'error-feedback'} type="danger">{formErrors.room_name}</Text>
+                    }
+                    <br/>
+                    <br/>
+                    <Input value={formValue.name} name={'name'} size={'large'} onChange={(e) => formHandler(e)} type={'text'} placeholder={'Your name'}></Input>
+                    <br/>
+                    {
+                        formErrors.name && <Text className={'error-feedback'} type="danger">{formErrors.name}</Text>
+                    }
 
-                <Col xs={{span: 1}} sm={{span: 1}} md={{span: 4}}>
-                    <div className={'full-height'}></div>
-                </Col>
-                <Col xs={{span: 22}} sm={{span: 22}} md={{span: 7}}>
+                    <br/>
+                    <br/>
+                    <Button loading={formValue.loading} onClick={() => submitForm()} type={'primary'}>Create Room</Button>
+                </Card>
 
-                    <Card title={'Create a room!'} className={'card-design'}>
-                        <Input size={'large'} name={'room_name'} value={this.state.create_room_form.value.room_name} onChange={(e) => this.form_handler(e)} type={'text'} placeholder={'Room Name'} bordered={true}></Input>
-                        <br />
-                        <Text className={'error-feedback'} type="danger">{this.state.create_room_form.errors.room_name}</Text>
-                        <br/>
-                        <br/>
-                        <Input value={this.state.create_room_form.value.name} name={'name'} size={'large'} onChange={(e) => this.form_handler(e)} type={'text'} placeholder={'Your name'}></Input>
-                        <br/>
-                        <Text className={'error-feedback'} type="danger">{this.state.create_room_form.errors.name}</Text>
-                        <br/>
-                        <br/>
-                        <Button loading={this.state.create_room_form.loading} onClick={() => this.submit_form()} type={'primary'}>Create Room</Button>
-                    </Card>
+            </Col>
 
-                </Col>
+            <Col xs={{span: 1}} sm={{span: 1}} md={{span: 4}}>
+                <div className={'full-height'}></div>
+            </Col>
 
-                <Col xs={{span: 1}} sm={{span: 1}} md={{span: 4}}>
-                    <div className={'full-height'}></div>
-                </Col>
-
-            </Row>
-
-
-        );
-    }
+        </Row>
+    )
 }
 
 export default HomePage;
