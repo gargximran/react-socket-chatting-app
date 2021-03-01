@@ -42,7 +42,10 @@ const HomePage = () => {
 
         ajax_post('/api/create_room', form)
             .then(res => {
-                new Audio(successTune).play()
+                const audio = new Audio(successTune)
+               audio.play()
+
+
                 message.success(res.message)
                 //redirect to room after successfull request
                 history.push('/'+ res.data.id)
