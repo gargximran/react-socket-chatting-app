@@ -4,6 +4,7 @@ import { ajax_post } from "../../helpers/ajax_request";
 import { useHistory } from 'react-router-dom'
 import errorTune from '../../assets/tune/error_bleep.mp3'
 import successTune from '../../assets/tune/success_beep.mp3'
+
 import './HomePage.css'
 
 const { Text } = Typography
@@ -97,5 +98,7 @@ const HomePage = () => {
         </Row>
     )
 }
+
+
 
 export default HomePage;
